@@ -635,18 +635,15 @@ int MQTTClient_setCallbacks(MQTTClient handle, void* context, MQTTClient_connect
 	FUNC_ENTRY;
 	Thread_lock_mutex(mqttclient_mutex);
 
-	//if (m == NULL || ma == NULL || m->c->connect_state != 0)
-	//  {
-	//        printf("faliure!\n");
-	//	rc = MQTTCLIENT_FAILURE;
-	//  }
-	//else
-	//{
+	if (m == NULL || ma == NULL || m->c->connect_state != 0)
+		rc = MQTTCLIENT_FAILURE;
+	else
+	{
 		m->context = context;
 		m->cl = cl;
 		m->ma = ma;
 		m->dc = dc;
-		//}
+	}
 
 	Thread_unlock_mutex(mqttclient_mutex);
 	FUNC_EXIT_RC(rc);
@@ -756,13 +753,13 @@ int MQTTClient_connectURI(MQTTClient handle, MQTTClient_connectOptions* options,
 	start = MQTTClient_start_clock();
 	if (m->ma && !running)
 	{
-	  Thread_start(MQTTClient_run, handle);
-	  	if (MQTTClient_elapsed(start) >= millisecsTimeout)
-	  	{
-	  		rc = SOCKET_ERROR;
-	  		goto exit;
-	  	}
-	  	MQTTClient_sleep(100L);
+		Thread_start(MQTTClient_run, handle);
+		if (MQTTClient_elapsed(start) >= millisecsTimeout)
+		{
+			rc = SOCKET_ERROR;
+			goto exit;
+		}
+		MQTTClient_sleep(100L);
 	}
 
 	m->c->keepAliveInterval = options->keepAliveInterval;
@@ -848,7 +845,6 @@ int MQTTClient_connectURI(MQTTClient handle, MQTTClient_connectOptions* options,
 #else
 	rc = MQTTProtocol_connect(serverURI, m->c);
 #endif
-
 	if (rc == SOCKET_ERROR)
 		goto exit;
 
@@ -861,7 +857,6 @@ int MQTTClient_connectURI(MQTTClient handle, MQTTClient_connectOptions* options,
 	if (m->c->connect_state == 1) /* TCP connect started - wait for completion */
 	{
 		Thread_unlock_mutex(mqttclient_mutex);
-
 		MQTTClient_waitfor(handle, CONNECT, &rc, millisecsTimeout - MQTTClient_elapsed(start));
 		Thread_lock_mutex(mqttclient_mutex);
 		if (rc != 0)
@@ -907,11 +902,9 @@ int MQTTClient_connectURI(MQTTClient handle, MQTTClient_connectOptions* options,
 		else
 		{
 #endif
-
 			m->c->connect_state = 3; /* TCP connect completed, in which case send the MQTT connect packet */
 			if (MQTTPacket_send_connect(m->c) == SOCKET_ERROR)
 			{
-	printf("now rc: %d\n", rc);
 				rc = SOCKET_ERROR;
 				goto exit;
 			}
@@ -919,7 +912,6 @@ int MQTTClient_connectURI(MQTTClient handle, MQTTClient_connectOptions* options,
 		}
 #endif
 	}
-
 	
 #if defined(OPENSSL)
 	if (m->c->connect_state == 2) /* SSL connect sent - wait for completion */

@@ -399,7 +399,6 @@ int Socket_writev(int socket, iobuf* iovecs, int count, unsigned long* bytes)
 	FUNC_ENTRY;
 #if defined(WIN32) || defined(WIN64)
 	rc = WSASend(socket, iovecs, count, (LPDWORD)bytes, 0, NULL, NULL);
-
 	if (rc == SOCKET_ERROR)
 	{
 		int err = Socket_error("WSASend - putdatas", socket);
@@ -419,7 +418,6 @@ int Socket_writev(int socket, iobuf* iovecs, int count, unsigned long* bytes)
 		*bytes = rc;
 #endif
 	FUNC_EXIT_RC(rc);
-
 	return rc;
 }
 
@@ -462,8 +460,6 @@ int Socket_putdatas(int socket, char* buf0, int buf0len, int count, char** buffe
 
 	if ((rc = Socket_writev(socket, iovecs, count+1, &bytes)) != SOCKET_ERROR)
 	{
-
-
 		if (bytes == total)
 			rc = TCPSOCKET_COMPLETE;
 		else

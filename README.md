@@ -23,3 +23,23 @@ MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby") do |c|
   puts "topic:#{m.topic} paylaod:#{m.payload}"
 end
 ```
+
+Block receive
+
+```ruby
+MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby") do |c|
+   c.receive do |m|
+     puts "topic:#{m.topic} paylaod:#{m.payload}"
+   end
+ end
+```
+
+```ruby
+ MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby") do |c|
+   loop do
+     c.receive do |m|
+       puts "topic:#{m.topic} paylaod:#{m.payload}"
+     end
+   end
+ end
+```

@@ -237,7 +237,7 @@ mqtt_subscribe(mrb_state *mrb, mrb_value self)
 }
 
 mrb_value
-mqtt_receive(mrb_state *mrb, mrb_value self)
+mqtt_block_receive(mrb_state *mrb, mrb_value self)
 {
   MQTTClient client = (MQTTClient)DATA_PTR(self);
 
@@ -295,7 +295,7 @@ mrb_mruby_mqtt_gem_init(mrb_state* mrb)
   mrb_define_method(mrb, c, "connect", mqtt_connect, MRB_ARGS_NONE());
   mrb_define_method(mrb, c, "publish", mqtt_publish, MRB_ARGS_REQ(3));
   mrb_define_method(mrb, c, "subscribe", mqtt_subscribe, MRB_ARGS_REQ(3));
-  mrb_define_method(mrb, c, "receive", mqtt_receive, MRB_ARGS_REQ(3));
+  mrb_define_method(mrb, c, "block_receive", mqtt_block_receive, MRB_ARGS_REQ(3));
   mrb_define_method(mrb, c, "disconnect", mqtt_disconnect, MRB_ARGS_NONE());
 }
 

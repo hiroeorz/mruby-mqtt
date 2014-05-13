@@ -12,8 +12,7 @@ class MQTTClient
   # MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby") do |c|
   #   c.subscribe("/tmp/shimane", 0)
   #   m = c.receive(300)
-  #   p m.topic
-  #   p m.payload
+  #   puts "topic:#{m.topic} paylaod:#{m.payload}"
   # end
   #
   def self.connect(address, client_id, &block)
@@ -26,6 +25,27 @@ class MQTTClient
     ensure
       client.disconnect
     end
+  end
+
+  #
+  # MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby") do |c|
+  #   c.receive do |m|
+  #     puts "topic:#{m.topic} paylaod:#{m.payload}"
+  #   end
+  # end
+  #
+  # MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby") do |c|
+  #   loop do
+  #     c.receive do |m|
+  #       puts "topic:#{m.topic} paylaod:#{m.payload}"
+  #     end
+  #   end
+  # end
+  #
+  def receive(timeout_sec = 60, &block)
+    msg = block_receive(timeout)
+    return msg unless block_given?
+    block.call(msg)
   end
 
 end

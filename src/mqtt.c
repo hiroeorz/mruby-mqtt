@@ -73,8 +73,8 @@ mqtt_init(mrb_state *mrb, mrb_value self)
   mrb_iv_set(mrb, self, mrb_intern_lit(mrb, "client_id"), client_id);
   mrb_iv_set(mrb, self, mrb_intern_lit(mrb, "keep_alive"), 
 	     mrb_fixnum_value(20));
-  mrb_iv_set(mrb, self, mrb_intern_lit(mrb, "timeout"), 
-	     mrb_fixnum_value(10));
+  mrb_iv_set(mrb, self, mrb_intern_lit(mrb, "request_timeout"), 
+	     mrb_fixnum_value(1000));
 
   DATA_PTR(self) = NULL;
   return self;
@@ -111,20 +111,20 @@ mqtt_set_keep_alive(mrb_state *mrb, mrb_value self)
   return keep_alive;
 }
 
-// exp: self.timeout #=> 10
+// exp: self.request_timeout #=> 10
 mrb_value
-mqtt_timeout(mrb_state *mrb, mrb_value self)
+mqtt_request_timeout(mrb_state *mrb, mrb_value self)
 {
-  return mrb_iv_get(mrb, self, mrb_intern_lit(mrb, "timeout"));
+  return mrb_iv_get(mrb, self, mrb_intern_lit(mrb, "request_timeout"));
 }
 
-// exp: self.timeout = 60
+// exp: self.request_timeout = 60
 mrb_value
-mqtt_set_timeout(mrb_state *mrb, mrb_value self) 
+mqtt_set_request_timeout(mrb_state *mrb, mrb_value self) 
 {
   mrb_value timeout_sec;
   mrb_get_args(mrb, "o", &timeout_sec);
-  mrb_iv_set(mrb, self, mrb_intern_lit(mrb, "timeout"), timeout_sec);
+  mrb_iv_set(mrb, self, mrb_intern_lit(mrb, "request_timeout"), timeout_sec);
   return timeout_sec;
 }
 
@@ -198,7 +198,7 @@ mqtt_publish(mrb_state *mrb, mrb_value self)
   char *topic_p = RSTRING_PTR(topic);
   char *payload_p = RSTRING_PTR(payload);
 
-  mrb_value m_timeout_sec = mqtt_timeout(mrb, self);
+  mrb_value m_timeout_sec = mqtt_request_timeout(mrb, self);
   mrb_int c_timeout_sec = (mrb_int)mrb_to_flo(mrb, m_timeout_sec);
 
   pubmsg.payload = payload_p;
@@ -290,8 +290,8 @@ mrb_mruby_mqtt_gem_init(mrb_state* mrb)
   mrb_define_method(mrb, c, "client_id", mqtt_address, MRB_ARGS_NONE());
   mrb_define_method(mrb, c, "keep_alive", mqtt_keep_alive, MRB_ARGS_NONE());
   mrb_define_method(mrb, c, "keep_alive=", mqtt_set_keep_alive, MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, c, "timeout", mqtt_timeout, MRB_ARGS_NONE());
-  mrb_define_method(mrb, c, "timeout=", mqtt_set_timeout, MRB_ARGS_NONE());
+  mrb_define_method(mrb, c, "request_timeout", mqtt_request_timeout, MRB_ARGS_NONE());
+  mrb_define_method(mrb, c, "request_timeout=", mqtt_set_request_timeout, MRB_ARGS_NONE());
   mrb_define_method(mrb, c, "connect", mqtt_connect, MRB_ARGS_NONE());
   mrb_define_method(mrb, c, "publish", mqtt_publish, MRB_ARGS_REQ(3));
   mrb_define_method(mrb, c, "subscribe", mqtt_subscribe, MRB_ARGS_REQ(3));

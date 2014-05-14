@@ -43,7 +43,7 @@ class MQTTClient
   # end
   #
   def receive(timeout_sec = 60, &block)
-    msg = block_receive(timeout)
+    msg = block_receive(timeout_sec)
     return msg unless block_given?
     block.call(msg)
   end

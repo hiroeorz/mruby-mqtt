@@ -87,6 +87,16 @@ mqtt_msgarrvd(void *context, char *topicName, int topicLen,
 	      MQTTAsync_message *message)
 {
   mqtt_state *m = DATA_PTR(_self);
+  char *ptr;
+
+  ptr = topicName;
+  for(int i = 0; i < topicLen; i++) { ptr++; }
+  *ptr = '\0';
+
+  ptr = message->payload;
+  for(int i = 0; i < message->payloadlen; i++) { ptr++; }
+  *ptr = '\0';
+
   mrb_value mrb_topic = mrb_str_new_cstr(m->mrb, topicName);
   mrb_value mrb_payload = mrb_str_new_cstr(m->mrb, message->payload);
 

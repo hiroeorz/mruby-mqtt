@@ -1,18 +1,43 @@
-# The MQTTClient class implements the MQTT Client.
-#
-# == Usage
-#
-# MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby") do |c|
-#   c.on_connect   = -> { c.subscribe("/temp/shimane", 0)}
-#   c.on_subscribe = -> { puts "subscribe success"}
-#   c.on_publish   = -> { puts "publish success"}
-# end
-#
-# Publish other scope
-#
-# mqtt = MQTTClient.instance
-# mqtt.publish("/mytopic", "mydata", 1)
-#
+=begin
+Copyright (c) 2014 Shin Hiroe
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+=end
+
+=begin
+
+The MQTTClient class implements the MQTT Client.
+
+== Usage
+
+MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby") do |c|
+  c.on_connect   = -> { c.subscribe("/temp/shimane", 0)}
+  c.on_subscribe = -> { puts "subscribe success"}
+  c.on_publish   = -> { puts "publish success"}
+end
+
+Publish other scope
+
+mqtt = MQTTClient.instance
+mqtt.publish("/mytopic", "mydata", 1)
+
+=end
 
 class MQTTClient
   include Singleton

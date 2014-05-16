@@ -84,7 +84,7 @@ mqtt_connlost(void *context, char *cause)
 
 int
 mqtt_msgarrvd(void *context, char *topicName, int topicLen,
-		  MQTTAsync_message *message)
+	      MQTTAsync_message *message)
 {
   mqtt_state *m = DATA_PTR(_self);
   mrb_value mrb_topic = mrb_str_new_cstr(m->mrb, topicName);
@@ -106,7 +106,6 @@ mqtt_on_disconnect(void* context, MQTTAsync_successData* response)
   mqtt_state *m = DATA_PTR(_self);
   mrb_funcall(m->mrb, m->self, "on_disconnect_callback", 0);
 }
-
 
 void
 mqtt_on_subscribe(void* context, MQTTAsync_successData* response)
@@ -244,8 +243,8 @@ mqtt_connect(mrb_state *mrb, mrb_value self)
   mrb_value m_client_id = mqtt_client_id(mrb, self);
   mrb_value m_keep_alive = mqtt_keep_alive(mrb, self);
   mrb_int c_keep_alive = (mrb_int)mrb_fixnum(m_keep_alive);
-  char *c_address = RSTRING_PTR(m_address);
-  char *c_client_id = RSTRING_PTR(m_client_id);
+  char *c_address = mrb_str_to_cstr(mrb, m_address);
+  char *c_client_id = mrb_str_to_cstr(mrb, m_client_id);
   int rc;
 
   MQTTAsync_create(&client, c_address, c_client_id, 
@@ -303,8 +302,8 @@ mqtt_publish(mrb_state *mrb, mrb_value self)
   mrb_value payload;
   mrb_int qos;
   mrb_get_args(mrb, "ooi", &topic, &payload, &qos);
-  char *topic_p = RSTRING_PTR(topic);
-  char *payload_p = RSTRING_PTR(payload);
+  char *topic_p = mrb_str_to_cstr(mrb, topic);
+  char *payload_p = mrb_str_to_cstr(mrb, payload);
 
   opts.onSuccess = mqtt_on_publish;
   opts.context = m->client;
@@ -337,7 +336,7 @@ mqtt_subscribe(mrb_state *mrb, mrb_value self)
   deliveredtoken = 0;
 
   mrb_get_args(mrb, "oi", &topic, &qos);
-  char *topic_p = RSTRING_PTR(topic);
+  char *topic_p = mrb_str_to_cstr(mrb, topic);
   
   if ((rc = MQTTAsync_subscribe(m->client, topic_p, qos, &opts)) != MQTTASYNC_SUCCESS) {
     mrb_raise(mrb, E_MQTT_SUBSCRIBE_ERROR, "subscribe failure");

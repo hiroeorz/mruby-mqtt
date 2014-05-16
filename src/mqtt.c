@@ -42,7 +42,6 @@ typedef struct _mqtt_state {
   MQTTAsync client;
 } mqtt_state;
 
-volatile MQTTAsync_token deliveredtoken;
 static mrb_value _self;
 
 /*******************************************************************
@@ -343,8 +342,7 @@ mqtt_publish(mrb_state *mrb, mrb_value self)
   pubmsg.payload = payload_p;
   pubmsg.payloadlen = strlen(payload_p);
   pubmsg.qos = qos;
-  pubmsg.retained = 0;
-  deliveredtoken = 0;
+  pubmsg.retained = 0;  // retain not supported now.
 
   if ((rc = MQTTAsync_sendMessage(m->client, topic_p, &pubmsg, &opts)) != MQTTASYNC_SUCCESS) {
     mrb_raise(mrb, E_MQTT_PUBLISH_ERROR, "subscribe failure");
@@ -365,7 +363,6 @@ mqtt_subscribe(mrb_state *mrb, mrb_value self)
   opts.onSuccess = mqtt_on_subscribe;
   opts.onFailure = mqtt_on_subscribe_failure;
   opts.context = m->client;
-  deliveredtoken = 0;
 
   mrb_get_args(mrb, "oi", &topic, &qos);
   char *topic_p = mrb_str_to_cstr(mrb, topic);

@@ -36,14 +36,14 @@ end
 
 callbacks
 
-- <code>on_connect = -> { ... }</code>
-- <code>on_subscribe = -> { ... }</code>
-- <code>on_publish = -> { ... }</code>
-- <code>on_disconnect = -> { ... }</code>
-- <code>on_connect_failure = -> { ... }</code>
-- <code>on_subscribe_failure = -> { ... }</code>
-- <code>on_connlost = -> { ... }</code>
-- <code>on_message = -> { |message| ... }</code>
+- on_connect = -> { ... }
+- on_subscribe = -> { ... }
+- on_publish = -> { ... }
+- on_disconnect = -> { ... }
+- on_connect_failure = -> { ... }
+- on_subscribe_failure = -> { ... }
+- on_connlost = -> { ... }
+- on_message = -> { |message| ... }
 
 on_message callback receive one argument, that is instance of MQTTMessage.
 

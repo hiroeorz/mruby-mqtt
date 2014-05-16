@@ -2,44 +2,38 @@
 
 mrbgem that wrap the Phaho MQTT protocol library, a lightweight M2M,IoT protocol publish/subscribe messaging.
 
-#Installing
+##Installing
 
-#Examples
-
-##Publish
+Write in /mruby/build_config.rb
 
 ```ruby
-MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby") do |c|
-  c.publish("/tmp/shimane", "hello", 0)
+MRuby::Build.new do |conf|
+  conf.gem :github => 'hiroeorz/mruby-mqtt', :branch => 'master'
 end
 ```
 
-##Subscribe
+##Examples
+
+###Publish
 
 ```ruby
 MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby") do |c|
-  c.subscribe("/tmp/shimane", 0)
-  m = c.receive(300)
-  puts "topic:#{m.topic} paylaod:#{m.payload}"
+  c.on_connect   = -> { c.subscribe("/temp/shimane", 0)}
+  c.on_subscribe = -> { puts "subscribe success"}
+  c.on_publish   = -> { puts "publish success"}
 end
 ```
 
-Block receive
+###Publish.
 
 ```ruby
-MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby") do |c|
-   c.receive do |m|
-     puts "topic:#{m.topic} paylaod:#{m.payload}"
-   end
- end
+mqtt = MQTTClient.instance
+mqtt.publish("/mytopic", "mydata", 1)
 ```
 
-```ruby
- MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby") do |c|
-   loop do
-     c.receive do |m|
-       puts "topic:#{m.topic} paylaod:#{m.payload}"
-     end
-   end
- end
-```
+##Limitations
+
+Only one MQTTClient instance created per one os process. This means that only one connection created to the broker per os process.
+
+##License
+The mruby-mqtt mrbgem is licensed under the terms of the MIT license. See the file LICENSE for details. 

@@ -59,7 +59,7 @@ MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby") do |c|
 end
 ```
 
-###Publish.
+###Publish
 
 ```ruby
 mqtt = MQTTClient.instance

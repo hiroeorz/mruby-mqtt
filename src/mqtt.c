@@ -37,6 +37,8 @@ THE SOFTWARE.
 #define E_MQTT_DISCONNECT_ERROR         (mrb_class_get(mrb, "MQTTDisconnectFailure"))
 
 typedef struct _mqtt_state {
+  const char *struct_name;
+  void (*dfree)(mrb_state *mrb, void*);
   mrb_state *mrb;
   mrb_value self;
   MQTTAsync client;
@@ -292,7 +294,7 @@ mqtt_connect(mrb_state *mrb, mrb_value self)
   if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS) {
     mrb_raise(mrb, E_MQTT_CONNECTION_FAILURE_ERROR, "connection failure");
   }
-
+ 
   mqtt_state *mqtt_state_p;
   mqtt_state_p = mrb_malloc(mrb, sizeof(mqtt_state));
   mqtt_state_p->mrb = mrb;

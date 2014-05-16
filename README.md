@@ -1,6 +1,9 @@
 #mruby-mqtt
 
-mrbgem that wrap the Phaho MQTT protocol library, a lightweight M2M,IoT protocol publish/subscribe messaging.
+MQTT protocol library.
+
+MQTT is a lightweight M2M,IoT protocol publish/subscribe messaging.
+The mruby-mqtt is implemented as wrapper of [Paho C library](http://www.eclipse.org/paho/)
 
 ##Installing
 
@@ -14,7 +17,7 @@ end
 
 ##Examples
 
-###Publish
+###Setup
 
 ```ruby
 MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby") do |c|

@@ -46,4 +46,4 @@ mqtt.publish("/mytopic", "mydata", 1)
 Only one MQTTClient instance created per one os process. This means that only one connection created to the broker per os process.
 
 ##License
-The mruby-mqtt mrbgem is licensed under the terms of the MIT license. See the file LICENSE for details. 
+See source code files.

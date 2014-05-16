@@ -40,6 +40,7 @@ class MQTTClient
   attr_reader :connecting
   attr_accessor :on_connect, :on_subscribe, :on_publish, :on_disconnect
   attr_accessor :on_connect_failure, :on_subscribe_failure, :on_connlost
+  attr_accessor :on_message
 
   class << self
     def connect(address, client_id, &block)
@@ -96,6 +97,7 @@ class MQTTClient
 
   def on_message_callback(message)
     puts "received: #{message.topic} : #{message.payload}"
+    @on_message.call(message) if @on_message
   end
 
   def on_publish_callback

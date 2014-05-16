@@ -34,11 +34,39 @@ MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby") do |c|
 end
 ```
 
+callbacks
+
+- <code>on_connect = -> { ... }</code>
+- <code>on_subscribe = -> { ... }</code>
+- <code>on_publish = -> { ... }</code>
+- <code>on_disconnect = -> { ... }</code>
+- <code>on_connect_failure = -> { ... }</code>
+- <code>on_subscribe_failure = -> { ... }</code>
+- <code>on_connlost = -> { ... }</code>
+- <code>on_message = -> { |message| ... }</code>
+
+on_message callback receive one argument, that is instance of MQTTMessage.
+
+```ruby
+c.on_message = -> { |message|
+  puts message.topic
+  puts message.payload
+}
+```
+
 ###Publish.
 
 ```ruby
 mqtt = MQTTClient.instance
 mqtt.publish("/mytopic", "mydata", 1)
+```
+
+###Disconnect
+
+```ruby
+mqtt = MQTTClient.instance
+mqtt.on_disconnect = -> { puts "disconnected." }
+mqtt.disconnect
 ```
 
 ##Limitations

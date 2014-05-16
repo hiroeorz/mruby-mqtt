@@ -11,7 +11,14 @@ Write in /mruby/build_config.rb
 
 ```ruby
 MRuby::Build.new do |conf|
+
   conf.gem :github => 'hiroeorz/mruby-mqtt', :branch => 'master'
+
+  conf.linker do |linker|
+    #linker.link_options = "%{flags} -o %{outfile} %{objs} %{libs}"
+    linker.link_options = "%{flags} -o %{outfile} %{objs} %{libs} -lpthread -Wl -lm"
+  end
+
 end
 ```
 

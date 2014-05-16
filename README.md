@@ -48,10 +48,15 @@ callbacks
 on_message callback receive one argument, that is instance of MQTTMessage.
 
 ```ruby
-c.on_message = -> { |message|
-  puts message.topic
-  puts message.payload
-}
+MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby") do |c|
+
+  ...
+
+  c.on_message = -> { |message|
+    puts message.topic
+    puts message.payload
+  }
+end
 ```
 
 ###Publish.

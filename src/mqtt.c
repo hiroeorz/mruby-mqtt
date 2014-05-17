@@ -311,7 +311,7 @@ mqtt_connect(mrb_state *mrb, mrb_value self)
   DATA_PTR(self) = mqtt_state_p;
   _self = self;
 
-  return mrb_bool_value(1);
+  return mrb_bool_value(TRUE);
 }
 
 mrb_value
@@ -328,7 +328,7 @@ mqtt_disconnect(mrb_state *mrb, mrb_value self)
     mrb_raise(mrb, E_MQTT_DISCONNECT_ERROR, "disconnect failure");
   }
 
-  return mrb_bool_value(1);
+  return mrb_bool_value(TRUE);
 }
 
 mrb_value
@@ -342,7 +342,8 @@ mqtt_publish(mrb_state *mrb, mrb_value self)
   mrb_value topic;
   mrb_value payload;
   mrb_int qos;
-  mrb_get_args(mrb, "ooi", &topic, &payload, &qos);
+  mrb_bool retain;
+  mrb_get_args(mrb, "ooib", &topic, &payload, &qos, &retain);
   char *topic_p = mrb_str_to_cstr(mrb, topic);
   char *payload_p = mrb_str_to_cstr(mrb, payload);
 
@@ -352,13 +353,15 @@ mqtt_publish(mrb_state *mrb, mrb_value self)
   pubmsg.payload = payload_p;
   pubmsg.payloadlen = strlen(payload_p);
   pubmsg.qos = qos;
-  pubmsg.retained = 0;  // retain not supported now.
+  pubmsg.retained = retain;  // retain not supported now.
+
+  printf("retain:%d\n", retain);
 
   if ((rc = MQTTAsync_sendMessage(m->client, topic_p, &pubmsg, &opts)) != MQTTASYNC_SUCCESS) {
-    mrb_raise(mrb, E_MQTT_PUBLISH_ERROR, "subscribe failure");
+    mrb_raise(mrb, E_MQTT_PUBLISH_ERROR, "publish failure");
   }
 
-  return mrb_bool_value(1);
+  return mrb_bool_value(TRUE);
 }
 
 mrb_value
@@ -381,7 +384,7 @@ mqtt_subscribe(mrb_state *mrb, mrb_value self)
     mrb_raise(mrb, E_MQTT_SUBSCRIBE_ERROR, "subscribe failure");
   }
 
-  return mrb_bool_value(1);
+  return mrb_bool_value(TRUE);
 }
 
 void
@@ -416,7 +419,7 @@ mrb_mruby_mqtt_gem_init(mrb_state* mrb)
   mrb_define_method(mrb, c, "request_timeout", mqtt_request_timeout, MRB_ARGS_NONE());
   mrb_define_method(mrb, c, "request_timeout=", mqtt_set_request_timeout, MRB_ARGS_NONE());
   mrb_define_method(mrb, c, "connect", mqtt_connect, MRB_ARGS_NONE());
-  mrb_define_method(mrb, c, "publish", mqtt_publish, MRB_ARGS_REQ(3));
+  mrb_define_method(mrb, c, "publish_internal", mqtt_publish, MRB_ARGS_REQ(4));
   mrb_define_method(mrb, c, "subscribe", mqtt_subscribe, MRB_ARGS_REQ(2));
   mrb_define_method(mrb, c, "disconnect", mqtt_disconnect, MRB_ARGS_NONE());
 }

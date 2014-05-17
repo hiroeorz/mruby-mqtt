@@ -58,6 +58,21 @@ class MQTTClient
     @reconnect_interval ||= 5
   end
 
+  def publish(topic, payload, opts = {})
+    qos = opts[:qos] || 0
+    retain = opts[:retain] || false
+
+    unless [0,1,2].include?(qos)
+      raise ArgumentError.new("invalid qos:#{qos}")
+    end
+
+    unless [true, false].include?(retain)
+      raise ArgumentError.new("invalid retain:#{retain}")
+    end
+
+    publish_internal(topic, payload, qos, retain)
+  end
+
   def on_connect_callback
     debug_out "on_connect_callback"
     @on_connect.call if @on_connect

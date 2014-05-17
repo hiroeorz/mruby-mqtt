@@ -353,9 +353,7 @@ mqtt_publish(mrb_state *mrb, mrb_value self)
   pubmsg.payload = payload_p;
   pubmsg.payloadlen = strlen(payload_p);
   pubmsg.qos = qos;
-  pubmsg.retained = retain;  // retain not supported now.
-
-  printf("retain:%d\n", retain);
+  pubmsg.retained = retain;
 
   if ((rc = MQTTAsync_sendMessage(m->client, topic_p, &pubmsg, &opts)) != MQTTASYNC_SUCCESS) {
     mrb_raise(mrb, E_MQTT_PUBLISH_ERROR, "publish failure");

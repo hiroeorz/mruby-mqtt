@@ -52,7 +52,7 @@ MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby") do |c|
 
   ...
 
-  c.on_message = -> { |message|
+  c.on_message = -> (message) {
     puts message.topic
     puts message.payload
   }

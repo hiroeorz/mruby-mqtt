@@ -48,10 +48,9 @@ class MQTTClient
       client = self.instance
       client.address = address
       client.client_id = client_id
-      return client unless block_given?
-
-      block.call(client)
+      block.call(client) if block_given?
       client.connect
+      return client
     end
   end
 

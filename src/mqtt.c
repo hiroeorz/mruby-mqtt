@@ -31,11 +31,11 @@ THE SOFTWARE.
 #include <string.h>
 #include "MQTTAsync.h"
 
-#define E_MQTT_ALREADY_CONNECTED_ERROR  (mrb_class_get(mrb, "MQTTAlreadyConnected"))
-#define E_MQTT_CONNECTION_FAILURE_ERROR (mrb_class_get(mrb, "MQTTConnectionFailure"))
-#define E_MQTT_SUBSCRIBE_ERROR          (mrb_class_get(mrb, "MQTTSubscribeFailure"))
-#define E_MQTT_PUBLISH_ERROR            (mrb_class_get(mrb, "MQTTPublishFailure"))
-#define E_MQTT_DISCONNECT_ERROR         (mrb_class_get(mrb, "MQTTDisconnectFailure"))
+#define E_MQTT_ALREADY_CONNECTED_ERROR  (mrb_class_get(mrb, "MQTTAlreadyConnectedError"))
+#define E_MQTT_CONNECTION_FAILURE_ERROR (mrb_class_get(mrb, "MQTTConnectionFailureError"))
+#define E_MQTT_SUBSCRIBE_ERROR          (mrb_class_get(mrb, "MQTTSubscribeFailureError"))
+#define E_MQTT_PUBLISH_ERROR            (mrb_class_get(mrb, "MQTTPublishFailureError"))
+#define E_MQTT_DISCONNECT_ERROR         (mrb_class_get(mrb, "MQTTDisconnectFailureError"))
 
 typedef struct _mqtt_state {
   const char *struct_name;
@@ -387,12 +387,12 @@ mqtt_subscribe(mrb_state *mrb, mrb_value self)
 void
 mrb_mruby_mqtt_gem_init(mrb_state* mrb)
 {
-  mrb_define_class(mrb, "MQTTConnectionFailure", mrb->eStandardError_class);
-  mrb_define_class(mrb, "MQTTSubscribeFailure",  mrb->eStandardError_class);
-  mrb_define_class(mrb, "MQTTPublishFailure",    mrb->eStandardError_class);
-  mrb_define_class(mrb, "MQTTDisconnectFailure", mrb->eStandardError_class);
-  mrb_define_class(mrb, "MQTTNullClient",        mrb->eStandardError_class);
-  mrb_define_class(mrb, "MQTTAlreadyConnected",        mrb->eStandardError_class);
+  mrb_define_class(mrb, "MQTTConnectionFailureError", mrb->eStandardError_class);
+  mrb_define_class(mrb, "MQTTSubscribeFailureError",  mrb->eStandardError_class);
+  mrb_define_class(mrb, "MQTTPublishFailureError",    mrb->eStandardError_class);
+  mrb_define_class(mrb, "MQTTDisconnectFailureError", mrb->eStandardError_class);
+  mrb_define_class(mrb, "MQTTNullClientError",        mrb->eStandardError_class);
+  mrb_define_class(mrb, "MQTTAlreadyConnectedError",  mrb->eStandardError_class);
 
   struct RClass *d;
   d = mrb_define_class(mrb, "MQTTMessage", mrb->object_class);

@@ -78,5 +78,18 @@ mqtt.disconnect
 
 Only one MQTTClient instance created per one os process. This means that only one connection created to the broker per os process.
 
+```ruby
+m1 = MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby")
+ #=> #<MQTTClient:0x7fbbd981c8b0>
+
+m2 = MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby")
+Error: MQTT Already connected (MQTTAlreadyConnectedError)
+
+m1.disconnect #=> true
+
+m2 = MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby") 
+ #=> #<MQTTClient:0x7fbbd981c8b0>
+```
+
 ##License
 See source code files.

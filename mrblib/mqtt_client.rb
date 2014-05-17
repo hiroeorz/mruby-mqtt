@@ -37,10 +37,11 @@
 class MQTTClient
   include Singleton
 
-  attr_reader :connecting
   attr_accessor :on_connect, :on_subscribe, :on_publish, :on_disconnect
   attr_accessor :on_connect_failure, :on_subscribe_failure, :on_connlost
   attr_accessor :on_message
+  attr_accessor :reconnect_interval
+  attr_accessor :debug
 
   class << self
     def connect(address, client_id, &block)
@@ -54,73 +55,67 @@ class MQTTClient
     end
   end
 
-  def initialize
-    @connecting = nil
-  end
-
-  def connect
-    if @connecting
-      raise MQTTAlreadyConnectedError.new("already connected")
-    end
-
-    connect!
+  def reconnect_interval
+    @reconnect_interval ||= 5
   end
 
   def on_connect_callback
-    puts "on_connect_callback"
-    @connecting = true
+    debug_out "on_connect_callback"
     @on_connect.call if @on_connect
   end
 
   def on_connect_failure_callback
-    puts "connection lost"; p cause
-
-    @connecting = nil
+    debug_out "connection lost"; p cause
 
     if @on_connect_failure
       @on_connect_failure.call
     else
-      sleep 3
+      sleep reconnect_interval
       connect
     end    
   end
 
   def on_subscribe_callback
-    puts "on_subscribe_callback"
+    debug_out "on_subscribe_callback"
     @on_subscribe.call if @on_subscribe
   end
 
   def on_subscribe_failure_callback
-    puts "on_subscribe_failure_callback"
+    debug_out "on_subscribe_failure_callback"
     @on_subscribe_failure.call if @on_subscribe_failure
   end
 
   def on_message_callback(message)
-    puts "received: #{message.topic} : #{message.payload}"
+    debug_out "received: #{message.topic} : #{message.payload}"
     @on_message.call(message) if @on_message
   end
 
   def on_publish_callback
-    puts "on_publish_callback"
+    debug_out "on_publish_callback"
     @on_publish.call if @on_publish
   end
 
   def on_disconnect_callback
-    puts "on_disconnect_callback"
-    @connecting = nil
+    debug_out "on_disconnect_callback"
     @on_disconnect.call if @on_disconnect
   end
 
   def connlost_callback(cause)
-    puts "connection lost"; p cause
-    @connecting = nil
+    debug_out "connection lost"; p cause
 
     if @on_connlost
       @on_connlost.call
     else
-      sleep 3
+      sleep reconnect_interval
       connect
     end
+  end
+
+  private
+
+  def debug_out(str, *args)
+    return unless @debug
+    printf(str + "\n", *args)
   end
 
 end

@@ -31,6 +31,7 @@ THE SOFTWARE.
 #include <string.h>
 #include "MQTTAsync.h"
 
+#define E_MQTT_ALREADY_CONNECTED_ERROR  (mrb_class_get(mrb, "MQTTAlreadyConnected"))
 #define E_MQTT_CONNECTION_FAILURE_ERROR (mrb_class_get(mrb, "MQTTConnectionFailure"))
 #define E_MQTT_SUBSCRIBE_ERROR          (mrb_class_get(mrb, "MQTTSubscribeFailure"))
 #define E_MQTT_PUBLISH_ERROR            (mrb_class_get(mrb, "MQTTPublishFailure"))
@@ -45,6 +46,7 @@ typedef struct _mqtt_state {
 } mqtt_state;
 
 static mrb_value _self;
+static int mqtt_connected;
 
 /*******************************************************************
   MQTTMessage Class
@@ -97,14 +99,6 @@ mqtt_set_msg_payload(mrb_state *mrb, mrb_value message)
   MQTT Call backs
  *******************************************************************/
 
-void
-mqtt_connlost(void *context, char *cause)
-{
-  mqtt_state *m = DATA_PTR(_self);
-  mrb_sym cause_sym = mrb_intern_cstr(m->mrb, cause);
-  mrb_funcall(m->mrb, m->self, "connlost_callback", 1, cause_sym);
-}
-
 int
 mqtt_msgarrvd(void *context, char *topicName, int topicLen,
 	      MQTTAsync_message *message)
@@ -113,16 +107,15 @@ mqtt_msgarrvd(void *context, char *topicName, int topicLen,
   char *ptr;
 
   ptr = topicName;
-  for(int i = 0; i < topicLen; i++) { ptr++; }
+  for(int i = 0; i < topicLen; i++) ptr++;
   *ptr = '\0';
 
   ptr = message->payload;
-  for(int i = 0; i < message->payloadlen; i++) { ptr++; }
+  for(int i = 0; i < message->payloadlen; i++) ptr++;
   *ptr = '\0';
 
   mrb_value mrb_topic = mrb_str_new_cstr(m->mrb, topicName);
   mrb_value mrb_payload = mrb_str_new_cstr(m->mrb, message->payload);
-
   mrb_value mrb_message = mqtt_msg_new(m->mrb);
   mrb_funcall(m->mrb, mrb_message, "topic=", 1, mrb_topic);
   mrb_funcall(m->mrb, mrb_message, "payload=", 1, mrb_payload);
@@ -134,9 +127,19 @@ mqtt_msgarrvd(void *context, char *topicName, int topicLen,
 }
 
 void
+mqtt_connlost(void *context, char *cause)
+{
+  mqtt_state *m = DATA_PTR(_self);
+  mrb_sym cause_sym = mrb_intern_cstr(m->mrb, cause);
+  mqtt_connected = FALSE;
+  mrb_funcall(m->mrb, m->self, "connlost_callback", 1, cause_sym);
+}
+
+void
 mqtt_on_disconnect(void* context, MQTTAsync_successData* response)
 {
   mqtt_state *m = DATA_PTR(_self);
+  mqtt_connected = FALSE;
   mrb_funcall(m->mrb, m->self, "on_disconnect_callback", 0);
 }
 
@@ -173,6 +176,7 @@ void
 mqtt_on_connect(void* context, MQTTAsync_successData* response)
 {
   mqtt_state *m = DATA_PTR(_self);
+  mqtt_connected = TRUE;
   mrb_funcall(m->mrb, m->self, "on_connect_callback", 0);
 }
 
@@ -270,6 +274,10 @@ mqtt_set_request_timeout(mrb_state *mrb, mrb_value self)
 mrb_value
 mqtt_connect(mrb_state *mrb, mrb_value self)
 {
+  if (mqtt_connected) {
+    mrb_raise(mrb, E_MQTT_ALREADY_CONNECTED_ERROR, "MQTT Already connected");
+  }
+
   MQTTAsync client;
   MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
   mrb_value m_address = mqtt_address(mrb, self);
@@ -384,6 +392,7 @@ mrb_mruby_mqtt_gem_init(mrb_state* mrb)
   mrb_define_class(mrb, "MQTTPublishFailure",    mrb->eStandardError_class);
   mrb_define_class(mrb, "MQTTDisconnectFailure", mrb->eStandardError_class);
   mrb_define_class(mrb, "MQTTNullClient",        mrb->eStandardError_class);
+  mrb_define_class(mrb, "MQTTAlreadyConnected",        mrb->eStandardError_class);
 
   struct RClass *d;
   d = mrb_define_class(mrb, "MQTTMessage", mrb->object_class);
@@ -406,7 +415,7 @@ mrb_mruby_mqtt_gem_init(mrb_state* mrb)
   mrb_define_method(mrb, c, "keep_alive=", mqtt_set_keep_alive, MRB_ARGS_REQ(1));
   mrb_define_method(mrb, c, "request_timeout", mqtt_request_timeout, MRB_ARGS_NONE());
   mrb_define_method(mrb, c, "request_timeout=", mqtt_set_request_timeout, MRB_ARGS_NONE());
-  mrb_define_method(mrb, c, "connect!", mqtt_connect, MRB_ARGS_NONE());
+  mrb_define_method(mrb, c, "connect", mqtt_connect, MRB_ARGS_NONE());
   mrb_define_method(mrb, c, "publish", mqtt_publish, MRB_ARGS_REQ(3));
   mrb_define_method(mrb, c, "subscribe", mqtt_subscribe, MRB_ARGS_REQ(2));
   mrb_define_method(mrb, c, "disconnect", mqtt_disconnect, MRB_ARGS_NONE());

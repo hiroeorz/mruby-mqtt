@@ -29,7 +29,7 @@ end
 
 ```ruby
 MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby") do |c|
-  c.on_connect   = -> { c.subscribe("/temp/shimane", 0)}
+  c.on_connect   = -> { c.subscribe("/temp/shimane")}
   c.on_subscribe = -> { puts "subscribe success"}
   c.on_publish   = -> { puts "publish success"}
 end

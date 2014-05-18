@@ -114,7 +114,7 @@ class MQTTClient
   end
 
   def on_connect_failure_callback
-    debug_out "connection lost"; p cause
+    debug_out "connection lost"
 
     if @on_connect_failure
       @on_connect_failure.call
@@ -167,7 +167,4 @@ class MQTTClient
     printf(str + "\n", *args)
   end
 
-end
-
-class MQTTAlreadyConnectedError < StandardError
 end

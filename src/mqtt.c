@@ -418,7 +418,7 @@ mrb_mruby_mqtt_gem_init(mrb_state* mrb)
   mrb_define_method(mrb, c, "request_timeout=", mqtt_set_request_timeout, MRB_ARGS_NONE());
   mrb_define_method(mrb, c, "connect", mqtt_connect, MRB_ARGS_NONE());
   mrb_define_method(mrb, c, "publish_internal", mqtt_publish, MRB_ARGS_REQ(4));
-  mrb_define_method(mrb, c, "subscribe", mqtt_subscribe, MRB_ARGS_REQ(2));
+  mrb_define_method(mrb, c, "subscribe_internal", mqtt_subscribe, MRB_ARGS_REQ(2));
   mrb_define_method(mrb, c, "disconnect", mqtt_disconnect, MRB_ARGS_NONE());
 }
 

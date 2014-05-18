@@ -37,16 +37,17 @@ assert("MQTTClient.connect") do
     }
   end
 
+  m = MQTTClient.instance
 
   Sleep.sleep 1
   assert_equal 1, subscribe_count
   assert_equal 6, publish_count
-  m = MQTTClient.instance
+  assert_equal 2, get_message_count
   assert_equal true, m.disconnect
   Sleep.sleep 5 # wait disconnect callback.
 end
 
-assert("MQTTClient.publish with invalid QoS") do
+assert("MQTTClient#publish with invalid QoS") do
   mqtt = MQTTClient.instance
 
   [3 .. 100].each do |qos|
@@ -58,6 +59,23 @@ assert("MQTTClient.publish with invalid QoS") do
   [-100 .. -1].each do |qos|
     assert_raise(ArgumentError) {
       mqtt.publish("/my/topic", "payload", qos:qos)
+    }
+  end
+
+end
+
+assert("MQTTClient#subscribe with invalid QoS") do
+  mqtt = MQTTClient.instance
+
+  [3 .. 100].each do |qos|
+    assert_raise(ArgumentError) {
+      mqtt.subscribe("/my/topic", "payload", qos:qos)
+    }
+  end
+
+  [-100 .. -1].each do |qos|
+    assert_raise(ArgumentError) {
+      mqtt.subscribe("/my/topic", "payload", qos:qos)
     }
   end
 

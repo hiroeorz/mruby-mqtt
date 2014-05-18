@@ -12,6 +12,7 @@ Write in /mruby/build_config.rb
 ```ruby
 MRuby::Build.new do |conf|
 
+  conf.gem :github => 'ksss/mruby-singleton', :branch => 'master'
   conf.gem :github => 'hiroeorz/mruby-mqtt', :branch => 'master'
 
   conf.linker do |linker|

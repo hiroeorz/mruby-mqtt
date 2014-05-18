@@ -57,6 +57,11 @@ assert("MQTTClient.instance.clean_session = false") do
   mqtt.clean_session = true
   assert_equal true, mqtt.clean_session
 
+  assert_raise(ArgumentError) { mqtt.clean_session = 1 }
+  assert_raise(ArgumentError) { mqtt.clean_session = 0 }
+  assert_raise(ArgumentError) { mqtt.clean_session = "true" }
+  assert_raise(ArgumentError) { mqtt.clean_session = nil }
+
 end
 
 assert("MQTTClient.instance.reconnect_interval") do
@@ -66,5 +71,9 @@ assert("MQTTClient.instance.reconnect_interval") do
 
   mqtt.reconnect_interval = 10
   assert_equal 10, mqtt.reconnect_interval
+
+  assert_raise(ArgumentError) { mqtt.reconnect_interval = true }
+  assert_raise(ArgumentError) { mqtt.reconnect_interval = "true" }
+  assert_raise(ArgumentError) { mqtt.reconnect_interval = nil }
 
 end

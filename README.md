@@ -35,6 +35,14 @@ MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby") do |c|
 end
 ```
 
+The default QoS of subscribe request is 0.
+
+You can add QoS value as labeled arguments.
+
+```ruby
+  c.subscribe("/temp/shimane", qos:1)
+```
+
 callbacks
 
 - on_connect = -> { ... }
@@ -64,7 +72,16 @@ end
 
 ```ruby
 mqtt = MQTTClient.instance
-mqtt.publish("/mytopic", "mydata", 1)
+mqtt.publish("/mytopic", "mydata")
+```
+- The default value of QoS is 0.
+- The default value of Reain is false.
+
+You can add QoS or Retain value as labeled arguments.
+
+```ruby
+mqtt = MQTTClient.instance
+mqtt.publish("/mytopic", "mydata", qos:1, retain:true)
 ```
 
 ###Disconnect

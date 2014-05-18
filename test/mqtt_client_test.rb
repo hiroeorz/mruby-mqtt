@@ -43,7 +43,7 @@ assert("MQTTClient.connect") do
   assert_equal 6, publish_count
   m = MQTTClient.instance
   assert_equal true, m.disconnect
-  Sleep.sleep 3 # wait disconnect callback.
+  Sleep.sleep 5 # wait disconnect callback.
 end
 
 assert("MQTTClient.instance.clean_session = false") do

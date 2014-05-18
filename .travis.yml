@@ -11,7 +11,6 @@ install:
   - sudo apt-get -qq install mosquitto
 
 before_script:
-  - service mosquitto start
   - cd ../
   - git clone https://github.com/mruby/mruby.git
   - cd mruby

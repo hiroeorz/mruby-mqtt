@@ -24,6 +24,7 @@
 # == Usage
 # 
 # MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby") do |c|
+#   c.clean_session = false
 #   c.on_connect   = -> { c.subscribe("/temp/shimane")}
 #   c.on_subscribe = -> { puts "subscribe success"}
 #   c.on_publish   = -> { puts "publish success"}

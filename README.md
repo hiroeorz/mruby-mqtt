@@ -29,6 +29,9 @@ end
 
 ```ruby
 MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby") do |c|
+  c.clean_session = false   # default: true
+  c.reconnect_interval = 10 # default: 5
+
   c.on_connect   = -> { c.subscribe("/temp/shimane")}
   c.on_subscribe = -> { puts "subscribe success"}
   c.on_publish   = -> { puts "publish success"}
@@ -49,10 +52,16 @@ callbacks
 - on_subscribe = -> { ... }
 - on_publish = -> { ... }
 - on_disconnect = -> { ... }
-- on_connect_failure = -> { ... }
+- on_connlost = -> { ... }          # default reconnect after @reconnect_interval
+- on_connect_failure = -> { ... }   # default reconnect after @reconnect_interval
 - on_subscribe_failure = -> { ... }
 - on_connlost = -> { ... }
 - on_message = -> { |message| ... }
+
+params
+
+- clean_session: true or false
+- reconnect_interval: integer
 
 on_message callback receive one argument, that is instance of MQTTMessage.
 

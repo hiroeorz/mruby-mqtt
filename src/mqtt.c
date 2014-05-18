@@ -270,6 +270,19 @@ mqtt_set_request_timeout(mrb_state *mrb, mrb_value self)
   MQTT Client Class API
  *******************************************************************/
 
+mrb_value
+mqtt_is_connected(mrb_state *mrb, mrb_value self)
+{
+  return mqtt_connected ? mrb_true_value() : mrb_false_value();
+}
+
+mrb_bool
+clean_session(mrb_state* mrb, mrb_value self)
+{
+  return mrb_obj_eq(mrb, mrb_true_value(),
+		    mrb_funcall(mrb, self, "clean_session", 0));
+}
+
 // exp: self.connect  #=> true | false
 mrb_value
 mqtt_connect(mrb_state *mrb, mrb_value self)
@@ -294,7 +307,7 @@ mqtt_connect(mrb_state *mrb, mrb_value self)
   MQTTAsync_setCallbacks(client, NULL, mqtt_connlost, mqtt_msgarrvd, NULL);
 
   conn_opts.keepAliveInterval = c_keep_alive;
-  conn_opts.cleansession = 1;
+  conn_opts.cleansession = clean_session(mrb, self);
   conn_opts.onSuccess = mqtt_on_connect;
   conn_opts.onFailure = mqtt_on_connect_failure;
   conn_opts.context = client;
@@ -417,6 +430,7 @@ mrb_mruby_mqtt_gem_init(mrb_state* mrb)
   mrb_define_method(mrb, c, "request_timeout", mqtt_request_timeout, MRB_ARGS_NONE());
   mrb_define_method(mrb, c, "request_timeout=", mqtt_set_request_timeout, MRB_ARGS_NONE());
   mrb_define_method(mrb, c, "connect", mqtt_connect, MRB_ARGS_NONE());
+  mrb_define_method(mrb, c, "connected?", mqtt_is_connected, MRB_ARGS_NONE());
   mrb_define_method(mrb, c, "publish_internal", mqtt_publish, MRB_ARGS_REQ(4));
   mrb_define_method(mrb, c, "subscribe_internal", mqtt_subscribe, MRB_ARGS_REQ(2));
   mrb_define_method(mrb, c, "disconnect", mqtt_disconnect, MRB_ARGS_NONE());

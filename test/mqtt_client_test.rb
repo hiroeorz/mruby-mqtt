@@ -43,5 +43,28 @@ assert("MQTTClient.connect") do
   assert_equal 6, publish_count
   m = MQTTClient.instance
   assert_equal true, m.disconnect
-  Sleep.sleep 1 # wait disconnect callback.
+  Sleep.sleep 3 # wait disconnect callback.
+end
+
+assert("MQTTClient.instance.clean_session = false") do
+
+  mqtt = MQTTClient.instance
+  assert_equal true, mqtt.clean_session
+
+  mqtt.clean_session = false
+  assert_equal false, mqtt.clean_session
+
+  mqtt.clean_session = true
+  assert_equal true, mqtt.clean_session
+
+end
+
+assert("MQTTClient.instance.reconnect_interval") do
+
+  mqtt = MQTTClient.instance
+  assert_equal 5, mqtt.reconnect_interval
+
+  mqtt.reconnect_interval = 10
+  assert_equal 10, mqtt.reconnect_interval
+
 end

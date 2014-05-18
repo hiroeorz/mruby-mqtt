@@ -24,7 +24,7 @@
 # == Usage
 # 
 # MQTTClient.connect("tcp://test.mosquitto.org:1883", "mruby") do |c|
-#   c.on_connect   = -> { c.subscribe("/temp/shimane", 0)}
+#   c.on_connect   = -> { c.subscribe("/temp/shimane")}
 #   c.on_subscribe = -> { puts "subscribe success"}
 #   c.on_publish   = -> { puts "publish success"}
 # end
@@ -40,7 +40,6 @@ class MQTTClient
   attr_accessor :on_connect, :on_subscribe, :on_publish, :on_disconnect
   attr_accessor :on_connect_failure, :on_subscribe_failure, :on_connlost
   attr_accessor :on_message
-  attr_accessor :reconnect_interval
   attr_accessor :debug
 
   class << self
@@ -56,6 +55,31 @@ class MQTTClient
 
   def reconnect_interval
     @reconnect_interval ||= 5
+  end
+
+  def reconnect_interval=(val)
+    unless val.kind_of? Numeric
+      raise ArgumentError.new("invalid reconnect_interval:#{val}")
+    end
+
+    @reconnect_interval = val
+  end
+
+  def clean_session
+    return true if @clean_session.nil? # defualt true
+    @clean_session
+  end
+
+  def clean_session=(val)
+    unless [true, false].include?(val)
+      raise ArgumentError.new("invalid clean_session:#{val}")
+    end
+
+    if connected?
+      raise ArgumentError.new("Can't set clean_session after connected")
+    end
+
+    @clean_session = val
   end
 
   def publish(topic, payload, opts = {})

@@ -108,6 +108,13 @@ check_mqtt_connected(mrb_state *mrb, mqtt_state *m)
   }
 }
 
+mrb_bool
+clean_session_c(mrb_state* mrb, mrb_value self)
+{
+  return mrb_obj_eq(mrb, mrb_true_value(),
+		    mrb_funcall(mrb, self, "clean_session", 0));
+}
+
 /*******************************************************************
   MQTT Call backs
  *******************************************************************/
@@ -311,13 +318,6 @@ mqtt_is_connected(mrb_state *mrb, mrb_value self)
   return mqtt_connected ? mrb_true_value() : mrb_false_value();
 }
 
-mrb_bool
-clean_session(mrb_state* mrb, mrb_value self)
-{
-  return mrb_obj_eq(mrb, mrb_true_value(),
-		    mrb_funcall(mrb, self, "clean_session", 0));
-}
-
 // exp: self.connect  #=> true | false
 mrb_value
 mqtt_connect(mrb_state *mrb, mrb_value self)
@@ -342,7 +342,7 @@ mqtt_connect(mrb_state *mrb, mrb_value self)
   MQTTAsync_setCallbacks(client, NULL, mqtt_connlost, mqtt_msgarrvd, NULL);
 
   conn_opts.keepAliveInterval = c_keep_alive;
-  conn_opts.cleansession = clean_session(mrb, self);
+  conn_opts.cleansession = clean_session_c(mrb, self);
   conn_opts.onSuccess = mqtt_on_connect;
   conn_opts.onFailure = mqtt_on_connect_failure;
   conn_opts.context = client;

@@ -32,6 +32,7 @@ THE SOFTWARE.
 #include "MQTTAsync.h"
 
 #define E_MQTT_ALREADY_CONNECTED_ERROR  (mrb_class_get(mrb, "MQTTAlreadyConnectedError"))
+#define E_MQTT_NOT_CONNECTED_ERROR      (mrb_class_get(mrb, "MQTTNotConnectedError"))
 #define E_MQTT_CONNECTION_FAILURE_ERROR (mrb_class_get(mrb, "MQTTConnectionFailureError"))
 #define E_MQTT_SUBSCRIBE_ERROR          (mrb_class_get(mrb, "MQTTSubscribeFailureError"))
 #define E_MQTT_PUBLISH_ERROR            (mrb_class_get(mrb, "MQTTPublishFailureError"))
@@ -96,6 +97,18 @@ mqtt_set_msg_payload(mrb_state *mrb, mrb_value message)
 }
 
 /*******************************************************************
+  MQTT Client Class Internal functions
+ *******************************************************************/
+
+static void
+check_mqtt_connected(mrb_state *mrb, mqtt_state *m)
+{
+  if (m == NULL){
+    mrb_raise(mrb, E_MQTT_NOT_CONNECTED_ERROR, "MQTT not connected");
+  }
+}
+
+/*******************************************************************
   MQTT Call backs
  *******************************************************************/
 
@@ -104,6 +117,8 @@ mqtt_msgarrvd(void *context, char *topicName, int topicLen,
 	      MQTTAsync_message *message)
 {
   mqtt_state *m = DATA_PTR(_self);
+  if (m == NULL) return 0;
+
   char *ptr;
 
   ptr = topicName;
@@ -130,23 +145,33 @@ void
 mqtt_connlost(void *context, char *cause)
 {
   mqtt_state *m = DATA_PTR(_self);
+  if (m == NULL) return;
+
   mrb_sym cause_sym = mrb_intern_cstr(m->mrb, cause);
   mqtt_connected = FALSE;
   mrb_funcall(m->mrb, m->self, "connlost_callback", 1, cause_sym);
+  mrb_free(m->mrb, m);
+  DATA_PTR(_self) = NULL;
 }
 
 void
 mqtt_on_disconnect(void* context, MQTTAsync_successData* response)
 {
   mqtt_state *m = DATA_PTR(_self);
+  if (m == NULL) return;
+
   mqtt_connected = FALSE;
   mrb_funcall(m->mrb, m->self, "on_disconnect_callback", 0);
+  mrb_free(m->mrb, m);
+  DATA_PTR(_self) = NULL;
 }
 
 void
 mqtt_on_subscribe(void* context, MQTTAsync_successData* response)
 {
   mqtt_state *m = DATA_PTR(_self);
+  if (m == NULL) return;
+
   mrb_funcall(m->mrb, m->self, "on_subscribe_callback", 0);
 }
 
@@ -154,6 +179,8 @@ void
 mqtt_on_subscribe_failure(void* context, MQTTAsync_failureData* response)
 {
   mqtt_state *m = DATA_PTR(_self);
+  if (m == NULL) return;
+
   mrb_funcall(m->mrb, m->self, "on_subscribe_failure_callback", 0);
 }
 
@@ -161,6 +188,8 @@ void
 mqtt_on_publish(void* context, MQTTAsync_successData* response)
 {
   mqtt_state *m = DATA_PTR(_self);
+  if (m == NULL) return;
+
   mrb_funcall(m->mrb, m->self, "on_publish_callback", 0);
 }
 
@@ -168,7 +197,11 @@ void
 mqtt_on_connect_failure(void* context, MQTTAsync_failureData* response)
 {
   mqtt_state *m = DATA_PTR(_self);
+  if (m == NULL) return;
+
   mrb_funcall(m->mrb, m->self, "on_connect_failure_callback", 0);
+  mrb_free(m->mrb, m);
+  DATA_PTR(_self) = NULL;
 }
 
 
@@ -176,6 +209,8 @@ void
 mqtt_on_connect(void* context, MQTTAsync_successData* response)
 {
   mqtt_state *m = DATA_PTR(_self);
+  if (m == NULL) return;
+
   mqtt_connected = TRUE;
   mrb_funcall(m->mrb, m->self, "on_connect_callback", 0);
 }
@@ -331,9 +366,10 @@ mrb_value
 mqtt_disconnect(mrb_state *mrb, mrb_value self)
 {
   mqtt_state *m = DATA_PTR(_self);
+  check_mqtt_connected(mrb, m);
+
+  int rc;  
   MQTTAsync_disconnectOptions opts = MQTTAsync_disconnectOptions_initializer;
-  int rc;
-  
   opts.onSuccess = mqtt_on_disconnect;
   opts.context = m->client;
   
@@ -347,8 +383,10 @@ mqtt_disconnect(mrb_state *mrb, mrb_value self)
 mrb_value
 mqtt_publish(mrb_state *mrb, mrb_value self)
 {
-  int rc;
   mqtt_state *m = DATA_PTR(_self);
+  check_mqtt_connected(mrb, m);
+
+  int rc;
   MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
   MQTTAsync_message pubmsg = MQTTAsync_message_initializer;
 
@@ -378,11 +416,12 @@ mqtt_publish(mrb_state *mrb, mrb_value self)
 mrb_value
 mqtt_subscribe(mrb_state *mrb, mrb_value self)
 {
-  int rc;
   mqtt_state *m = DATA_PTR(_self);
+  check_mqtt_connected(mrb, m);
+
+  int rc;
   mrb_value topic;
   mrb_int qos;
-
   MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
   opts.onSuccess = mqtt_on_subscribe;
   opts.onFailure = mqtt_on_subscribe_failure;
@@ -407,6 +446,7 @@ mrb_mruby_mqtt_gem_init(mrb_state* mrb)
   mrb_define_class(mrb, "MQTTDisconnectFailureError", mrb->eStandardError_class);
   mrb_define_class(mrb, "MQTTNullClientError",        mrb->eStandardError_class);
   mrb_define_class(mrb, "MQTTAlreadyConnectedError",  mrb->eStandardError_class);
+  mrb_define_class(mrb, "MQTTNotConnectedError",  mrb->eStandardError_class);
 
   struct RClass *d;
   d = mrb_define_class(mrb, "MQTTMessage", mrb->object_class);

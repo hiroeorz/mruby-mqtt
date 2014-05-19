@@ -39,8 +39,6 @@ THE SOFTWARE.
 #define E_MQTT_DISCONNECT_ERROR         (mrb_class_get(mrb, "MQTTDisconnectFailureError"))
 
 typedef struct _mqtt_state {
-  const char *struct_name;
-  void (*dfree)(mrb_state *mrb, void*);
   mrb_state *mrb;
   mrb_value self;
   MQTTAsync client;

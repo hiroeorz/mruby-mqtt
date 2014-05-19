@@ -56,7 +56,7 @@ callbacks
 - on_connect_failure = -> { ... }   # default reconnect after @reconnect_interval
 - on_subscribe_failure = -> { ... }
 - on_connlost = -> { ... }
-- on_message = -> { |message| ... }
+- on_message = -> (message) { ... }
 
 params
 

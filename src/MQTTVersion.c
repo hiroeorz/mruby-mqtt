@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 IBM Corp.
+ * Copyright (c) 2012, 2015 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -124,9 +124,11 @@ int loadandcall(char* libname)
 	int rc = 0;
 	MQTTAsync_nameValue* (*func_address)(void) = NULL;
 #if defined(WIN32) || defined(WIN64)
-	HMODULE APILibrary = LoadLibrary(libname);
-	
-	if (APILibrary == NULL)
+	wchar_t wlibname[30];
+	HMODULE APILibrary;
+
+	mbstowcs(wlibname, libname, strlen(libname) + 1);
+	if ((APILibrary = LoadLibrary(wlibname)) == NULL)
 		printf("Error loading library %s, error code %d\n", libname, GetLastError());
 	else
 	{
@@ -176,7 +178,7 @@ void printEyecatchers(char* filename)
 int main(int argc, char** argv)
 {
 	printf("MQTTVersion: print the version strings of an MQTT client library\n"); 
-	printf("Copyright (c) 2013 IBM Corp.\n"); 
+	printf("Copyright (c) 2012, 2015 IBM Corp.\n");
 	
 	if (argc == 1)
 	{

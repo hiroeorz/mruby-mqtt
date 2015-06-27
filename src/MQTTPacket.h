@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2013 IBM Corp.
+ * Copyright (c) 2009, 2014 IBM Corp.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,6 +13,7 @@
  * Contributors:
  *    Ian Craggs - initial API and implementation and/or initial documentation
  *    Ian Craggs, Allan Stockdill-Mander - SSL updates
+ *    Ian Craggs - MQTT 3.1.1 support
  *******************************************************************************/
 
 #if !defined(MQTTPACKET_H)
@@ -32,7 +33,7 @@ include "Clients"
 BE*/
 
 typedef unsigned int bool;
-typedef void* (*pf)(unsigned char, char*, int);
+typedef void* (*pf)(unsigned char, char*, size_t);
 
 #define BAD_MQTT_PACKET -4
 
@@ -120,6 +121,23 @@ typedef struct
 typedef struct
 {
 	Header header; /**< MQTT header byte */
+	union
+	{
+		unsigned char all;	/**< all connack flags */
+#if defined(REVERSED)
+		struct
+		{
+			unsigned int reserved : 7;	/**< message type nibble */
+			bool sessionPresent : 1;    /**< was a session found on the server? */
+		} bits;
+#else
+		struct
+		{
+			bool sessionPresent : 1;    /**< was a session found on the server? */
+			unsigned int reserved : 7;	/**< message type nibble */
+		} bits;
+#endif
+	} flags;	 /**< connack flags byte */
 	char rc; /**< connack return code */
 } Connack;
 
@@ -202,30 +220,30 @@ int MQTTPacket_encode(char* buf, int length);
 int MQTTPacket_decode(networkHandles* net, int* value);
 int readInt(char** pptr);
 char* readUTF(char** pptr, char* enddata);
-char readChar(char** pptr);
+unsigned char readChar(char** pptr);
 void writeChar(char** pptr, char c);
 void writeInt(char** pptr, int anInt);
-void writeUTF(char** pptr, char* string);
+void writeUTF(char** pptr, const char* string);
 
 char* MQTTPacket_name(int ptype);
 
 void* MQTTPacket_Factory(networkHandles* net, int* error);
-int MQTTPacket_send(networkHandles* net, Header header, char* buffer, int buflen);
-int MQTTPacket_sends(networkHandles* net, Header header, int count, char** buffers, int* buflens);
+int MQTTPacket_send(networkHandles* net, Header header, char* buffer, size_t buflen, int free);
+int MQTTPacket_sends(networkHandles* net, Header header, int count, char** buffers, size_t* buflens, int* frees);
 
-void* MQTTPacket_header_only(unsigned char aHeader, char* data, int datalen);
-int MQTTPacket_send_disconnect(networkHandles* net, char* clientID);
+void* MQTTPacket_header_only(unsigned char aHeader, char* data, size_t datalen);
+int MQTTPacket_send_disconnect(networkHandles* net, const char* clientID);
 
-void* MQTTPacket_publish(unsigned char aHeader, char* data, int datalen);
+void* MQTTPacket_publish(unsigned char aHeader, char* data, size_t datalen);
 void MQTTPacket_freePublish(Publish* pack);
-int MQTTPacket_send_publish(Publish* pack, int dup, int qos, int retained, networkHandles* net, char* clientID);
-int MQTTPacket_send_puback(int msgid, networkHandles* net, char* clientID);
-void* MQTTPacket_ack(unsigned char aHeader, char* data, int datalen);
+int MQTTPacket_send_publish(Publish* pack, int dup, int qos, int retained, networkHandles* net, const char* clientID);
+int MQTTPacket_send_puback(int msgid, networkHandles* net, const char* clientID);
+void* MQTTPacket_ack(unsigned char aHeader, char* data, size_t datalen);
 
 void MQTTPacket_freeSuback(Suback* pack);
-int MQTTPacket_send_pubrec(int msgid, networkHandles* net, char* clientID);
-int MQTTPacket_send_pubrel(int msgid, int dup, networkHandles* net, char* clientID);
-int MQTTPacket_send_pubcomp(int msgid, networkHandles* net, char* clientID);
+int MQTTPacket_send_pubrec(int msgid, networkHandles* net, const char* clientID);
+int MQTTPacket_send_pubrel(int msgid, int dup, networkHandles* net, const char* clientID);
+int MQTTPacket_send_pubcomp(int msgid, networkHandles* net, const char* clientID);
 
 void MQTTPacket_free_packet(MQTTPacket* pack);
 
